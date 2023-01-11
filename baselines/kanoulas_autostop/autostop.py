@@ -1,7 +1,7 @@
 from active_learning.base_policy import BaseAnnotatingPolicy, Probs, Indices, Inputs, Labels
 from baselines.kanoulas_autostop.sampler import HTAPPriorSampler
 from scipy.stats import entropy
-from sld.sld_policy import adjusted_sld
+from sld.sld import adjusted_sld
 import numpy as np
 
 

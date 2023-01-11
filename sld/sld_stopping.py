@@ -21,6 +21,10 @@ class SLDQuantStopping(StoppingStrategyPreviousScores):
         return 2 * self.target_recall - self.target_recall ** 2 if self.use_margin else self.target_recall
 
     def __str__(self):
+        # Notice that (following our paper terminology):
+        #  - SALtQuantCI has self.nstd = 2;
+        #  - SALt has self.nstd = 0, self.use_margin = False;
+        #  - SAL^r_t ha self.nstd = 0, self.use_margin = True;
         return f"SLDQuant {self.nstd} & a={self.alpha} @ {self.target_recall:.2f} w\\ m={int(self.use_margin)}"
 
     def should_stop(self, x: Inputs, y: Labels, train_idxs: Indices, val_idxs: Indices, scores: Probs, i: int) -> bool:

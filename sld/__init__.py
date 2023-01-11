@@ -1,2 +1,1 @@
-from sld.sld_policy import SLDAnnotatingPolicy
 from sld.sld_stopping import SLDQuantStopping
