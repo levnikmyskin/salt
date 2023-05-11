@@ -37,7 +37,6 @@ class CormackBatch(BatchStrategy):
 
 
 class LinearStrategy(BatchStrategy):
-
     def next_batch_size(self) -> int:
         return self._b
 

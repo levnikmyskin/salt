@@ -7,7 +7,9 @@ import numpy as np
 SEED = 42
 
 
-pattern = re.compile(r'(?P<policy>(ALvUS|ALvRS|PL|ALvDS))_(?P<label>.+)_(?P<size>\d+)size_(?P<classifier>.+)_results\.pkl')
+pattern = re.compile(
+    r"(?P<policy>(ALvUS|ALvRS|PL|ALvDS))_(?P<label>.+)_(?P<size>\d+)size_(?P<classifier>.+)_results\.pkl"
+)
 
 
 class ALPolicy(enum.Enum):
@@ -18,14 +20,14 @@ class ALPolicy(enum.Enum):
     TEST_SAMPLING = enum.auto()
 
     @staticmethod
-    def from_string(string: str) -> 'ALPolicy':
-        if string == 'ALvRS' or string == 'RS':
+    def from_string(string: str) -> "ALPolicy":
+        if string == "ALvRS" or string == "RS":
             return ALPolicy.RELEVANCE_SAMPLING
-        elif string == 'ALvUS' or string == 'US':
+        elif string == "ALvUS" or string == "US":
             return ALPolicy.UNCERTAINTY_SAMPLING
-        elif string == 'PL':
+        elif string == "PL":
             return ALPolicy.PASSIVE_LEARNING
-        elif string == 'ALvDS' or string == 'DS':
+        elif string == "ALvDS" or string == "DS":
             return ALPolicy.DIVERSITY_SAMPLING
 
     def __str__(self):
@@ -39,32 +41,44 @@ class ALPolicy(enum.Enum):
             return "ALvDS"
 
 
-def random_dataset_with_given_prevalences(x, y, tr_prev, te_prev, tr_size, te_size, seed=None, return_idxs=False):
+def random_dataset_with_given_prevalences(
+    x, y, tr_prev, te_prev, tr_size, te_size, seed=None, return_idxs=False
+):
     tr_pos_to_take = round(tr_size * tr_prev)
     tr_neg_to_take = abs(tr_size - tr_pos_to_take)
     te_pos_to_take = round(te_size * te_prev)
     te_neg_to_take = abs(te_pos_to_take - te_size)
 
-    x_tr, y_tr, tr_idxs = __get_xy_with_given_pos_and_negs(x, y, tr_pos_to_take, tr_neg_to_take, seed)
+    x_tr, y_tr, tr_idxs = __get_xy_with_given_pos_and_negs(
+        x, y, tr_pos_to_take, tr_neg_to_take, seed
+    )
 
     te_indices = set(np.arange(y.shape[0])) - set(tr_idxs)
     if not return_idxs:
         x_te, y_te = x[list(te_indices)], y[list(te_indices)]
-        x_te, y_te, _ = __get_xy_with_given_pos_and_negs(x_te, y_te, te_pos_to_take, te_neg_to_take, seed)
+        x_te, y_te, _ = __get_xy_with_given_pos_and_negs(
+            x_te, y_te, te_pos_to_take, te_neg_to_take, seed
+        )
         return x_tr, y_tr, x_te, y_te
     return tr_idxs, np.array(list(te_indices))
 
 
 def random_sample_from_dataset(x, y, tr_size: int, seed=None):
     indices = np.arange(y.shape[0])
-    training_idxs = np.random.default_rng(seed=seed).choice(indices, size=tr_size, replace=False)
+    training_idxs = np.random.default_rng(seed=seed).choice(
+        indices, size=tr_size, replace=False
+    )
     test_idxs = list(set(indices) - set(training_idxs))
     return x[training_idxs], y[training_idxs], x[test_idxs], y[test_idxs]
 
 
 def __get_xy_with_given_pos_and_negs(x, y, pos_to_take, neg_to_take, seed):
-    positives = np.random.default_rng(seed=seed).choice(np.where(y == 1)[0], size=pos_to_take, replace=False)
-    negatives = np.random.default_rng(seed=seed).choice(np.where(y == 0)[0], size=neg_to_take, replace=False)
+    positives = np.random.default_rng(seed=seed).choice(
+        np.where(y == 1)[0], size=pos_to_take, replace=False
+    )
+    negatives = np.random.default_rng(seed=seed).choice(
+        np.where(y == 0)[0], size=neg_to_take, replace=False
+    )
     idxs = np.hstack((positives, negatives))
     np.random.default_rng().shuffle(idxs)
     return x[idxs], y[idxs], idxs
@@ -80,18 +94,23 @@ def take(n, iterable):
     return list(itertools.islice(iterable, n))
 
 
-def filter_file(filename: str, policy: Optional[ALPolicy], classifier: Optional[str], sizes: Optional[Set[int]],
-                labels: Optional[Set[str]]) -> Optional[Match]:
+def filter_file(
+    filename: str,
+    policy: Optional[ALPolicy],
+    classifier: Optional[str],
+    sizes: Optional[Set[int]],
+    labels: Optional[Set[str]],
+) -> Optional[Match]:
     match = pattern.match(filename)
     if not match:
         return None
-    if policy and ALPolicy.from_string(match.group('policy')) is not policy:
+    if policy and ALPolicy.from_string(match.group("policy")) is not policy:
         return None
-    if classifier and match.group('classifier') != classifier.replace(' ', ''):
+    if classifier and match.group("classifier") != classifier.replace(" ", ""):
         return None
-    if sizes and int(match.group('size')) not in sizes:
+    if sizes and int(match.group("size")) not in sizes:
         return None
-    if labels and match.group('label') not in labels:
+    if labels and match.group("label") not in labels:
         return None
 
     return match
@@ -103,7 +122,6 @@ def aggregate_same_sizes(policy, classifier, file_list, sizes, labels):
         match = filter_file(file, policy, classifier, sizes, labels)
         if not match:
             continue
-        size_f = aggregated.setdefault(int(match.group('size')), [])
+        size_f = aggregated.setdefault(int(match.group("size")), [])
         size_f.append(file)
     return aggregated
-

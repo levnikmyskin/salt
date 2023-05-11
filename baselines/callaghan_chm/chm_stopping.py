@@ -10,9 +10,17 @@ class CHMStopping(StoppingStrategyPreviousScores):
         self.len_annotated = []
 
     def __str__(self):
-        return f'CHM @ {self.target_recall:.2f}'
+        return f"CHM @ {self.target_recall:.2f}"
 
-    def should_stop(self, x: Inputs, y: Labels, train_idxs: Indices, val_idxs: Indices, scores: Probs, i: int) -> bool:
+    def should_stop(
+        self,
+        x: Inputs,
+        y: Labels,
+        train_idxs: Indices,
+        val_idxs: Indices,
+        scores: Probs,
+        i: int,
+    ) -> bool:
         if len(self.prev_training_set) == 0:
             return False
 
@@ -26,10 +34,14 @@ class CHMStopping(StoppingStrategyPreviousScores):
         annotated_cumsum = np.array(self.len_annotated).cumsum()
 
         for j in range(1, i):
-            if hypergeom.cdf(pos_found[-1] - pos_found[j],
-                             len(y) - annotated_cumsum[j],
-                             int(pos_found[-1] / self.target_recall - pos_found[j]),
-                             annotated_cumsum[-1] - annotated_cumsum[j]
-                             ) < self.alpha:
+            if (
+                hypergeom.cdf(
+                    pos_found[-1] - pos_found[j],
+                    len(y) - annotated_cumsum[j],
+                    int(pos_found[-1] / self.target_recall - pos_found[j]),
+                    annotated_cumsum[-1] - annotated_cumsum[j],
+                )
+                < self.alpha
+            ):
                 return True
         return False

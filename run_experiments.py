@@ -18,16 +18,23 @@ import copy
 
 
 def run_al(name, budget, x, y_c, pool_size, policy, stoppings):
-    res = {'y_c': y_c}
+    res = {"y_c": y_c}
     if y_c.sum() < 2:
         return name, {}
     random_pos = np.random.choice(np.where(y_c == 1)[0], size=1)
     random = np.random.choice(np.where(y_c == 0)[0], replace=False, size=1)
-    conf = ActiveLearningConfig(policy, stoppings, LinearStrategy(b=100), x, y_c, np.concatenate((random_pos, random)),
-                                stop_when_no_pos=False)
+    conf = ActiveLearningConfig(
+        policy,
+        stoppings,
+        LinearStrategy(b=100),
+        x,
+        y_c,
+        np.concatenate((random_pos, random)),
+        stop_when_no_pos=False,
+    )
     al = ActiveLearning(conf)
-    res['idxs'] = al.run(budget, pool_size)
-    res['stops'] = al.get_stops_as_dict()
+    res["idxs"] = al.run(budget, pool_size)
+    res["stops"] = al.get_stops_as_dict()
     return name, res
 
 
@@ -43,55 +50,76 @@ def calibrated_svm(**kwargs):
     return CalibratedClassifierCV(LinearSVC(), **kwargs)
 
 
-if __name__ == '__main__':
-    paper_name = ''
-    parser = argparse.ArgumentParser(f'Run experiments for paper {paper_name}')
-    parser.add_argument('-j', '--jobs', type=int, help='number of processes to spawn')
-    parser.add_argument('-lrj', '--lr-j', type=int, help='number of jobs for the LR')
+if __name__ == "__main__":
+    paper_name = ""
+    parser = argparse.ArgumentParser(f"Run experiments for paper {paper_name}")
+    parser.add_argument("-j", "--jobs", type=int, help="number of processes to spawn")
+    parser.add_argument("-lrj", "--lr-j", type=int, help="number of jobs for the LR")
     # parser.add_argument('-b', '--batch', choices=[CormackBatch], default=CormackBatch,
     #                    help='Batch strategy to use. Only Cormack\'s available atm.')
-    parser.add_argument('-t', '--target-recall', nargs='+', type=float, help='target recall TAR should stop at', required=True)
-    parser.add_argument('-p', '--pool-size', type=int, help='size of the pool to annotate', default=10_000)
-    parser.add_argument('-n', '--name', help='tmt save name', required=True)
-    parser.add_argument('-s', '--seed', type=int, help='random seed')
-    parser.add_argument('-r', '--runs', type=int, default=20, help='number of random runs')
+    parser.add_argument(
+        "-t",
+        "--target-recall",
+        nargs="+",
+        type=float,
+        help="target recall TAR should stop at",
+        required=True,
+    )
+    parser.add_argument(
+        "-p",
+        "--pool-size",
+        type=int,
+        help="size of the pool to annotate",
+        default=10_000,
+    )
+    parser.add_argument("-n", "--name", help="tmt save name", required=True)
+    parser.add_argument("-s", "--seed", type=int, help="random seed")
+    parser.add_argument(
+        "-r", "--runs", type=int, default=20, help="number of random runs"
+    )
 
     args = parser.parse_args()
     np.random.seed(args.seed)
     pool_size = args.pool_size
 
     # clf_kwargs = {'n_jobs': args.lr_j , 'ensemble': False}
-    clf_kwargs = {'n_jobs': args.lr_j}
+    clf_kwargs = {"n_jobs": args.lr_j}
     # baselines
     clf = LogisticRegression
     # clf = calibrated_svm
     policy = RelevancePolicy(clf, clf_args=[], clf_kwargs=clf_kwargs)
-    stoppings = [cormack_knee.KneeStopping(target_recall=args.target_recall),
-                 cormack_knee.BudgetStopping(target_recall=args.target_recall)]
+    stoppings = [
+        cormack_knee.KneeStopping(target_recall=args.target_recall),
+        cormack_knee.BudgetStopping(target_recall=args.target_recall),
+    ]
     for t in args.target_recall:
         quant = quantci.QuantStopping(target_recall=t)
         quant_1 = copy.deepcopy(quant)
-        quant_1.nstd = 1.
+        quant_1.nstd = 1.0
         quant_2 = copy.deepcopy(quant)
-        quant_2.nstd = 2.
+        quant_2.nstd = 2.0
 
-        adj_sld = SLDQuantStopping(target_recall=t, nstd=0., dataset_length=pool_size, use_margin=False)
-        adj_sld_m = SLDQuantStopping(target_recall=t, nstd=0., dataset_length=pool_size, use_margin=True)
+        adj_sld = SLDQuantStopping(
+            target_recall=t, nstd=0.0, dataset_length=pool_size, use_margin=False
+        )
+        adj_sld_m = SLDQuantStopping(
+            target_recall=t, nstd=0.0, dataset_length=pool_size, use_margin=True
+        )
         adj_sld_1 = copy.deepcopy(adj_sld)
         adj_sld_1.nstd = 1
         adj_sld_2 = copy.deepcopy(adj_sld)
         adj_sld_2.nstd = 2
 
         chm = callaghan_chm.CHMStopping(target_recall=t, dataset_length=pool_size)
-        stoppings.extend((
-            quant, quant_1, quant_2,
-            adj_sld, adj_sld_m, adj_sld_1, adj_sld_2,
-            chm
-        ))
+        stoppings.extend(
+            (quant, quant_1, quant_2, adj_sld, adj_sld_m, adj_sld_1, adj_sld_2, chm)
+        )
 
-    print('Loading dataset...')
+    print("Loading dataset...")
     dataset = fetch_rcv1()
-    pool_idxs = np.random.choice(np.arange(dataset.data.shape[0]), replace=False, size=pool_size)
+    pool_idxs = np.random.choice(
+        np.arange(dataset.data.shape[0]), replace=False, size=pool_size
+    )
 
     x, y = dataset.data[pool_idxs], dataset.target[pool_idxs].toarray()
     classes = np.arange(len(dataset.target_names))
@@ -103,27 +131,37 @@ if __name__ == '__main__':
 
     jobs = args.jobs if args.jobs else min(len(classes), 45)
 
-    print(f'Running with {jobs} jobs')
+    print(f"Running with {jobs} jobs")
     with ProcessPoolExecutor(max_workers=jobs) as p:
         futures = []
         for r in range(args.runs):
             for cls in classes:
                 y_c = y[:, cls]
-                topic_name = f'{dataset.target_names[cls]}_{r}'
-                futures.append(p.submit(run_al, topic_name, pool_size, copy.deepcopy(x), copy.deepcopy(y_c),
-                                        pool_size, copy.deepcopy(policy), copy.deepcopy(stoppings)))
+                topic_name = f"{dataset.target_names[cls]}_{r}"
+                futures.append(
+                    p.submit(
+                        run_al,
+                        topic_name,
+                        pool_size,
+                        copy.deepcopy(x),
+                        copy.deepcopy(y_c),
+                        pool_size,
+                        copy.deepcopy(policy),
+                        copy.deepcopy(stoppings),
+                    )
+                )
 
-        recorder(futures, f'{args.name}_results')
+        recorder(futures, f"{args.name}_results")
     # for c in tqdm(classes):
     #     name, res = run_al(dataset.target_names[c], pool_size, copy.deepcopy(x), copy.deepcopy(y[:, c]), pool_size,
     #                        copy.deepcopy(policy), copy.deepcopy(stoppings))
-        # sld_plot.name += f'; C={name}; CLF=SVM'
-        # adj_sld_plot.name += f'; C={name}; CLF=SVM'
-        # cknee_plot.name += f'; C={name}; CLF=SVM'
-        # sld_plot.plot()
-        # adj_sld_plot.plot()
-        # cknee_plot.plot()
-        #
-        # sld_plot.flush('SLD')
-        # adj_sld_plot.flush('Adj SLD')
-        # cknee_plot.flush('CKnee')
+    # sld_plot.name += f'; C={name}; CLF=SVM'
+    # adj_sld_plot.name += f'; C={name}; CLF=SVM'
+    # cknee_plot.name += f'; C={name}; CLF=SVM'
+    # sld_plot.plot()
+    # adj_sld_plot.plot()
+    # cknee_plot.plot()
+    #
+    # sld_plot.flush('SLD')
+    # adj_sld_plot.flush('Adj SLD')
+    # cknee_plot.flush('CKnee')

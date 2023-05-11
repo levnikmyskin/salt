@@ -9,7 +9,9 @@ from functools import cached_property
 
 
 class SLDQuantStopping(StoppingStrategyPreviousScores):
-    def __init__(self, *args, nstd=0, alpha=0.3, use_adjusted=True, use_margin=False, **kwargs):
+    def __init__(
+        self, *args, nstd=0, alpha=0.3, use_adjusted=True, use_margin=False, **kwargs
+    ):
         super().__init__(*args, **kwargs)
         self.nstd = nstd
         self.alpha = alpha
@@ -18,7 +20,11 @@ class SLDQuantStopping(StoppingStrategyPreviousScores):
 
     @cached_property
     def margin_target_recall(self):
-        return 2 * self.target_recall - self.target_recall ** 2 if self.use_margin else self.target_recall
+        return (
+            2 * self.target_recall - self.target_recall**2
+            if self.use_margin
+            else self.target_recall
+        )
 
     def __str__(self):
         # Notice that (following our paper terminology):
@@ -27,7 +33,15 @@ class SLDQuantStopping(StoppingStrategyPreviousScores):
         #  - SAL^r_t ha self.nstd = 0, self.use_margin = True;
         return f"SLDQuant {self.nstd} & a={self.alpha} @ {self.target_recall:.2f} w\\ m={int(self.use_margin)}"
 
-    def should_stop(self, x: Inputs, y: Labels, train_idxs: Indices, val_idxs: Indices, scores: Probs, i: int) -> bool:
+    def should_stop(
+        self,
+        x: Inputs,
+        y: Labels,
+        train_idxs: Indices,
+        val_idxs: Indices,
+        scores: Probs,
+        i: int,
+    ) -> bool:
         if i < self.min_rounds:
             return False
         last_annotated = list(set(train_idxs) - set(self.prev_training_set))
@@ -36,16 +50,29 @@ class SLDQuantStopping(StoppingStrategyPreviousScores):
             if i < 1:
                 sc = np.copy(scores[:, 1])
             else:
-                sld_post, _ = adjusted_sld(self.prev_scores[self.prev_test_set], self.prev_scores[self.prev_training_set].mean(0),
-                                           1 - cosine(self.prev_scores[last_annotated, 1], scores[last_annotated, 1]))
+                sld_post, _ = adjusted_sld(
+                    self.prev_scores[self.prev_test_set],
+                    self.prev_scores[self.prev_training_set].mean(0),
+                    1
+                    - cosine(
+                        self.prev_scores[last_annotated, 1], scores[last_annotated, 1]
+                    ),
+                )
                 sc = np.copy(scores[:, 1])
                 sc[self.prev_test_set] = sld_post[:, 1]
-                if normalized_absolute_error(y[last_annotated].mean(), sc[last_annotated].mean()) > self.alpha:
+                if (
+                    normalized_absolute_error(
+                        y[last_annotated].mean(), sc[last_annotated].mean()
+                    )
+                    > self.alpha
+                ):
                     sc = np.copy(scores[:, 1])
         else:
             if i < 5:
                 return False
-            sld_post, _ = run_sld(scores[current_test], self.prev_scores[current_test].mean(0))
+            sld_post, _ = run_sld(
+                scores[current_test], self.prev_scores[current_test].mean(0)
+            )
             sc = np.copy(scores[:, 1])
             sc[current_test] = sld_post[:, 1]
 

@@ -7,12 +7,21 @@ import numpy as np
 
 class StoppingListener(ABC):
     @abstractmethod
-    def on_estimated_recall(self, x: Inputs, y: Labels, tr_idxs: Indices, val_idxs: Indices,
-                            est_recalls: List[float], iteration: int):
+    def on_estimated_recall(
+        self,
+        x: Inputs,
+        y: Labels,
+        tr_idxs: Indices,
+        val_idxs: Indices,
+        est_recalls: List[float],
+        iteration: int,
+    ):
         raise NotImplementedError()
 
     @abstractmethod
-    def on_new_batch(self, x: Inputs, y: Labels, tr_idxs: Indices, val_idxs: Indices, batch: Indices):
+    def on_new_batch(
+        self, x: Inputs, y: Labels, tr_idxs: Indices, val_idxs: Indices, batch: Indices
+    ):
         raise NotImplementedError
 
 
@@ -27,7 +36,15 @@ class StoppingStrategy(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def should_stop(self, x: Inputs, y: Labels, train_idxs: Indices, val_idxs: Indices, scores: Probs, i: int) -> bool:
+    def should_stop(
+        self,
+        x: Inputs,
+        y: Labels,
+        train_idxs: Indices,
+        val_idxs: Indices,
+        scores: Probs,
+        i: int,
+    ) -> bool:
         raise NotImplementedError()
 
     def attach_listener(self, listener: StoppingListener):
@@ -36,8 +53,15 @@ class StoppingStrategy(ABC):
     def detach_listener(self, listener: StoppingListener):
         self.listeners.remove(listener)
 
-    def notify_new_recall(self, x: Inputs, y: Labels, train_idxs: Indices, val_idxs: Indices,
-                          recall: List[float], iteration: int):
+    def notify_new_recall(
+        self,
+        x: Inputs,
+        y: Labels,
+        train_idxs: Indices,
+        val_idxs: Indices,
+        recall: List[float],
+        iteration: int,
+    ):
         for listener in self.listeners:
             listener.on_estimated_recall(x, y, train_idxs, val_idxs, recall, iteration)
 
@@ -65,5 +89,13 @@ class StoppingStrategyPreviousScores(StoppingStrategy, ABC):
 
         return inner
 
-    def should_stop(self, x: Inputs, y: Labels, train_idxs: Indices, val_idxs: Indices, scores: Probs, i: int) -> bool:
+    def should_stop(
+        self,
+        x: Inputs,
+        y: Labels,
+        train_idxs: Indices,
+        val_idxs: Indices,
+        scores: Probs,
+        i: int,
+    ) -> bool:
         raise NotImplementedError()

@@ -7,7 +7,7 @@ from active_learning.stopping_strategy import StoppingStrategy
 
 
 class KneeStopping(StoppingStrategy):
-    def __init__(self, *args, window=3, flats=10, rho='dynamic', **kwargs):
+    def __init__(self, *args, window=3, flats=10, rho="dynamic", **kwargs):
         super().__init__(*args, **kwargs)
         self.window = window
         self.flats = flats
@@ -17,7 +17,15 @@ class KneeStopping(StoppingStrategy):
     def __str__(self):
         return "Knee"
 
-    def should_stop(self, x: Inputs, y: Labels, train_idxs: Indices, val_idxs: Indices, scores: Probs, i: int) -> bool:
+    def should_stop(
+        self,
+        x: Inputs,
+        y: Labels,
+        train_idxs: Indices,
+        val_idxs: Indices,
+        scores: Probs,
+        i: int,
+    ) -> bool:
         if i < self.min_rounds:
             return False
         x_tr, y_tr = x[train_idxs], y[train_idxs]
@@ -34,7 +42,7 @@ class KneeStopping(StoppingStrategy):
             except ZeroDivisionError:
                 current_rho = 0
 
-            rho = 156 - min(current_rels, 150) if self.rho == 'dynamic' else self.rho
+            rho = 156 - min(current_rels, 150) if self.rho == "dynamic" else self.rho
             return self._check_rho(current_rho, rho, len(y), current_rels, n_assessed)
         return False
 
@@ -67,7 +75,6 @@ class KneeStopping(StoppingStrategy):
         # smooth
         smoothed_data = []
         for i in range(data_size):
-
             if 0 < i - self.window:
                 start_index = i - self.window
             else:
@@ -102,7 +109,9 @@ class KneeStopping(StoppingStrategy):
         # find indices for local maximums
         candidate_indices = []
         for i in range(1, data_size - 1):
-            if (differed_data[i - 1][1] < differed_data[i][1]) and (differed_data[i][1] > differed_data[i + 1][1]):
+            if (differed_data[i - 1][1] < differed_data[i][1]) and (
+                differed_data[i][1] > differed_data[i + 1][1]
+            ):
                 candidate_indices.append(i)
 
         # threshold

@@ -2,7 +2,18 @@ import numpy as np
 from collections import namedtuple
 from scipy.stats import entropy
 
-History = namedtuple("History", ("iteration", "priors", "posteriors", "stop_criterium", "accuracy", "precision", "recall"))
+History = namedtuple(
+    "History",
+    (
+        "iteration",
+        "priors",
+        "posteriors",
+        "stop_criterium",
+        "accuracy",
+        "precision",
+        "recall",
+    ),
+)
 
 
 def run_sld(posteriors_zero, priors_zero, epsilon=1e-6):
@@ -53,7 +64,7 @@ def adjusted_sld(posteriors_zero, priors_zero, clf_trustability, epsilon=1e-6, t
     while not val < epsilon and s < 1000:
         # E step
         ratios = (priors_s + 1e-10) / (priors_zero + 1e-10)
-        ratios = -(clf_trustability * (-ratios + 1)) ** tau + 1
+        ratios = -((clf_trustability * (-ratios + 1)) ** tau) + 1
 
         denominators = 0
         for c in range(priors_zero.shape[0]):
@@ -79,6 +90,9 @@ def adjusted_sld_from_val(x, y, tr_idxs, te_idxs, val_idxs, probs, clf):
     all_idxs = np.concatenate((tr_idxs, val_idxs))
     clf.fit(x[all_idxs], y[all_idxs])
     v_true_preds = clf.predict_proba(x[val_idxs])
-    sld_posteriors, _ = adjusted_sld(probs[te_idxs], probs[tr_idxs].mean(0),
-                                     np.clip(1 - entropy(probs[val_idxs, 1], qk=v_true_preds[:, 1]), 0, 1))
+    sld_posteriors, _ = adjusted_sld(
+        probs[te_idxs],
+        probs[tr_idxs].mean(0),
+        np.clip(1 - entropy(probs[val_idxs, 1], qk=v_true_preds[:, 1]), 0, 1),
+    )
     return sld_posteriors[:, 1], v_true_preds[:, 1]
