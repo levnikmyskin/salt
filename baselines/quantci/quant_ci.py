@@ -1,5 +1,4 @@
 from active_learning.base_policy import (
-    BaseAnnotatingPolicy,
     Probs,
     Indices,
     Inputs,
