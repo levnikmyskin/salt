@@ -65,6 +65,7 @@ if __name__ == "__main__":
         help="target recall TAR should stop at",
         required=True,
     )
+    parser.add_argument("-d", "--description", help="experiment description for tmt")
     parser.add_argument(
         "-p",
         "--pool-size",
@@ -149,7 +150,7 @@ if __name__ == "__main__":
 
     # For debugging
     # classes = np.random.choice(classes, replace=False, size=45)
-    recorder = tmt_recorder(args.name)(process_futures)
+    recorder = tmt_recorder(args.name, description=args.description)(process_futures)
 
     jobs = args.jobs if args.jobs else min(len(classes), 45)
 

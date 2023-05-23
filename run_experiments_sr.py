@@ -10,6 +10,7 @@ if __name__ == "__main__":
         f"Run experiments for paper {paper_name}. CLEF 2019 dataset."
     )
     parser.add_argument("-j", "--jobs", type=int, help="number of processes to spawn")
+    parser.add_argument("-d", "--description", help="experiment description for tmt")
     parser.add_argument("-lrj", "--lr-j", type=int, help="number of jobs for the LR")
     # parser.add_argument('-b', '--batch', choices=[CormackBatch], default=CormackBatch,
     #                    help='Batch strategy to use. Only Cormack\'s available atm.')
@@ -51,7 +52,7 @@ if __name__ == "__main__":
 
     topics = list(set(os.listdir(sr_path_tr) + os.listdir(sr_path_te)))
     jobs = args.jobs if args.jobs else max(len(topics), 45)
-    recorder = tmt_recorder(args.name)(process_futures)
+    recorder = tmt_recorder(args.name, description=args.description)(process_futures)
     print(f"Running with {jobs} jobs and {args.lr_j} jobs for LR")
     print("Loading dataset...")
     with ProcessPoolExecutor(max_workers=jobs) as p:
