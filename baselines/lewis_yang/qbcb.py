@@ -23,6 +23,7 @@ class QBCB(StoppingStrategy):
         self.positive_sample_size = positive_sample_size
         self.confidence = confidence
         self.pre_positives = None
+        self.pre_sample = None
 
     def pre_annotation(self, x: Inputs, y: Labels) -> int:
         # Generate the random sample `n` from which we take the positive
@@ -32,6 +33,7 @@ class QBCB(StoppingStrategy):
             np.vstack([x, y, np.arange(len(y))])
         )
         idx = np.where(perm[:, 1].cumsum() == self.positive_sample_size)[0][0] + 1
+        self.pre_sample = perm[:, 2][:idx]
         self.pre_positives = perm[:, 2][np.where(perm[:, 1][:idx] == 1)]
 
     def should_stop(
@@ -44,10 +46,7 @@ class QBCB(StoppingStrategy):
         i: int,
     ) -> bool:
         if self.pre_positives is None:
-            raise ValueError(
-                "The positive sample is None. You should call `pre_annotation` before "
-                "using this class as a stopping strategy."
-            )
+            self.pre_annotation(x, y)
         if i < self.min_rounds:
             return False
         coeffs = (
