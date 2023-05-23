@@ -10,6 +10,14 @@ import numpy as np
 
 
 class QBCB(StoppingStrategy):
+    """
+    Implements QBCB from David D. Lewis, Eugene Yang, and Ophir Frieder. 2021.
+    Certifying One-Phase Technology-Assisted Reviews. In Proceedings of the 30th ACM
+    International Conference on Information & Knowledge Management (CIKM '21).
+    Association for Computing Machinery, New York, NY, USA, 893–902.
+    https://doi.org/10.1145/3459637.3482415
+    """
+
     def __init__(self, *args, positive_sample_size=50, confidence=0.95, **kwargs):
         super().__init__(*args, **kwargs)
         self.positive_sample_size = positive_sample_size

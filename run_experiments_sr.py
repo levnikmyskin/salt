@@ -33,6 +33,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "-r", "--runs", type=int, default=20, help="number of random runs"
     )
+    parser.add_argument(
+        "--policy", choices=["RS, US"], help="active learning policy", default="RS"
+    )
 
     args = parser.parse_args()
     sr_path_tr = ".data/sr/2019_only/training"
@@ -41,7 +44,10 @@ if __name__ == "__main__":
     clf = LogisticRegression
     clf_kwargs = {"n_jobs": args.lr_j}
     # clf = calibrated_svm
-    policy = RelevancePolicy(clf, clf_args=[], clf_kwargs=clf_kwargs)
+    if args.policy == "RS":
+        policy = RelevancePolicy(clf, clf_args=[], clf_kwargs=clf_kwargs)
+    else:
+        policy = UncertaintyPolicy(clf, clf_args=[], clf_kwargs=clf_kwargs)
 
     topics = list(set(os.listdir(sr_path_tr) + os.listdir(sr_path_te)))
     jobs = args.jobs if args.jobs else max(len(topics), 45)
@@ -68,11 +74,14 @@ if __name__ == "__main__":
                     ),
                 ]
                 for t in args.target_recall:
-                    quant = lewis_young.QuantStopping(target_recall=t, min_rounds=0)
+                    quant = lewis_yang.QuantStopping(target_recall=t, min_rounds=0)
                     quant_1 = copy.deepcopy(quant)
                     quant_1.nstd = 1.0
                     quant_2 = copy.deepcopy(quant)
                     quant_2.nstd = 2.0
+                    qbcb = lewis_yang.QBCB(target_recall=t)
+
+                    ipp = sneyd_stevenson.IPP(target_recall=t)
 
                     adj_sld = SLDQuantStopping(
                         target_recall=t, nstd=0.0, dataset_length=len(y), min_rounds=0
@@ -96,6 +105,8 @@ if __name__ == "__main__":
                             quant,
                             quant_1,
                             quant_2,
+                            qbcb,
+                            ipp,
                             adj_sld,
                             adj_sld_m,
                             adj_sld_1,

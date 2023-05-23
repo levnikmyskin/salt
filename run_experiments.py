@@ -1,9 +1,9 @@
 from tmt import tmt_recorder, tmt_save
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from active_learning.active_learning import ActiveLearning, ActiveLearningConfig
-from active_learning.base_policy import RelevancePolicy
+from active_learning.base_policy import RelevancePolicy, UncertaintyPolicy
 from active_learning.batch_strategy import CormackBatch, LinearStrategy
-from baselines import cormack_knee, lewis_young, callaghan_chm
+from baselines import cormack_knee, lewis_yang, callaghan_chm, sneyd_stevenson
 from sld import SLDQuantStopping
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import LinearSVC
@@ -77,6 +77,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "-r", "--runs", type=int, default=20, help="number of random runs"
     )
+    parser.add_argument(
+        "--policy", choices=["RS, US"], help="active learning policy", default="RS"
+    )
 
     args = parser.parse_args()
     np.random.seed(args.seed)
@@ -87,17 +90,25 @@ if __name__ == "__main__":
     # baselines
     clf = LogisticRegression
     # clf = calibrated_svm
-    policy = RelevancePolicy(clf, clf_args=[], clf_kwargs=clf_kwargs)
+    if args.policy == "RS":
+        policy = RelevancePolicy(clf, clf_args=[], clf_kwargs=clf_kwargs)
+    else:
+        policy = UncertaintyPolicy(clf, clf_args=[], clf_kwargs=clf_kwargs)
+
     stoppings = [
         cormack_knee.KneeStopping(target_recall=args.target_recall),
         cormack_knee.BudgetStopping(target_recall=args.target_recall),
     ]
     for t in args.target_recall:
-        quant = lewis_young.QuantStopping(target_recall=t)
+        quant = lewis_yang.QuantStopping(target_recall=t)
         quant_1 = copy.deepcopy(quant)
         quant_1.nstd = 1.0
         quant_2 = copy.deepcopy(quant)
         quant_2.nstd = 2.0
+
+        qbcb = lewis_yang.QBCB(target_recall=t)
+
+        ipp = sneyd_stevenson.IPP(target_recall=t)
 
         adj_sld = SLDQuantStopping(
             target_recall=t, nstd=0.0, dataset_length=pool_size, use_margin=False
@@ -112,7 +123,18 @@ if __name__ == "__main__":
 
         chm = callaghan_chm.CHMStopping(target_recall=t, dataset_length=pool_size)
         stoppings.extend(
-            (quant, quant_1, quant_2, adj_sld, adj_sld_m, adj_sld_1, adj_sld_2, chm)
+            (
+                quant,
+                quant_1,
+                quant_2,
+                qbcb,
+                ipp,
+                adj_sld,
+                adj_sld_m,
+                adj_sld_1,
+                adj_sld_2,
+                chm,
+            )
         )
 
     print("Loading dataset...")
