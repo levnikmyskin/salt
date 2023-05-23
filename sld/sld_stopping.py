@@ -1,5 +1,5 @@
 import numpy as np
-from baselines.quantci.quant_ci import quant_stop
+from baselines.lewis_young.quant_ci import quant_stop
 from sld.sld import adjusted_sld, run_sld
 from active_learning.base_policy import Inputs, Labels, Indices, Probs
 from active_learning.stopping_strategy import StoppingStrategyPreviousScores

@@ -3,7 +3,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from active_learning.active_learning import ActiveLearning, ActiveLearningConfig
 from active_learning.base_policy import RelevancePolicy
 from active_learning.batch_strategy import CormackBatch, LinearStrategy
-from baselines import cormack_knee, quantci, callaghan_chm
+from baselines import cormack_knee, lewis_young, callaghan_chm
 from sld import SLDQuantStopping
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import LinearSVC
@@ -93,7 +93,7 @@ if __name__ == "__main__":
         cormack_knee.BudgetStopping(target_recall=args.target_recall),
     ]
     for t in args.target_recall:
-        quant = quantci.QuantStopping(target_recall=t)
+        quant = lewis_young.QuantStopping(target_recall=t)
         quant_1 = copy.deepcopy(quant)
         quant_1.nstd = 1.0
         quant_2 = copy.deepcopy(quant)

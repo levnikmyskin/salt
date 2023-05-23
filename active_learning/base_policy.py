@@ -57,3 +57,8 @@ class BaseAnnotatingPolicy(ABC):
 class RelevancePolicy(BaseAnnotatingPolicy):
     def sort_probas(self) -> Indices:
         return (-self.probas[:, 1]).argsort()
+
+
+class UncertaintyPolicy(BaseAnnotatingPolicy):
+    def sort_probas(self) -> Indices:
+        return (-(0.5 - self.probas[:, 1])).argsort()

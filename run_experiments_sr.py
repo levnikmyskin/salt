@@ -68,7 +68,7 @@ if __name__ == "__main__":
                     ),
                 ]
                 for t in args.target_recall:
-                    quant = quantci.QuantStopping(target_recall=t, min_rounds=0)
+                    quant = lewis_young.QuantStopping(target_recall=t, min_rounds=0)
                     quant_1 = copy.deepcopy(quant)
                     quant_1.nstd = 1.0
                     quant_2 = copy.deepcopy(quant)
