@@ -34,7 +34,7 @@ if __name__ == "__main__":
         "-r", "--runs", type=int, default=20, help="number of random runs"
     )
     parser.add_argument(
-        "--policy", choices=["RS, US"], help="active learning policy", default="RS"
+        "--policy", choices=["RS", "US"], help="active learning policy", default="RS"
     )
 
     args = parser.parse_args()
