@@ -30,7 +30,10 @@ class QBCB(StoppingStrategy):
         # sample size `r` (paper notation).
         # This must be called before using the class as a stopping strategy.
         perm = np.random.default_rng(42).permutation(np.vstack([y, np.arange(len(y))]))
-        idx = np.where(perm[:, 0].cumsum() == self.positive_sample_size)[0][0] + 1
+        if self.positive_sample_size < y.sum():
+            idx = len(y)
+        else:
+            idx = np.where(perm[:, 0].cumsum() == self.positive_sample_size)[0][0] + 1
         self.pre_sample = perm[:, 1][:idx]
         self.pre_positives = perm[:, 1][np.where(perm[:, 0][:idx] == 1)]
 
@@ -45,6 +48,8 @@ class QBCB(StoppingStrategy):
     ) -> bool:
         if self.pre_positives is None:
             self.pre_annotation(y)
+            if len(self.pre_sample) == len(y):
+                return True
         if i < self.min_rounds:
             return False
         coeffs = (
