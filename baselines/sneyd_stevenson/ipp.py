@@ -46,7 +46,7 @@ class IPP(StoppingStrategy):
             est_by_curve_end_samp = self.__distance_between_curves(y[train_idxs], a, k)
             if y_sum >= self.target_recall * est_by_curve_end_samp:
                 mu = (a / (k + 1)) * (len(y) ** (k + 1) - 1)
-                pred_n_rel = self.__predict_n_rel(0.95, len(train_idxs), mu)
+                pred_n_rel = self.__predict_n_rel(0.95, len(y), mu)
                 des_n_rel = self.target_recall * pred_n_rel
                 return des_n_rel <= y_sum
         except:
@@ -62,11 +62,12 @@ class IPP(StoppingStrategy):
         window_size = train_len // self.n_windows
         indices = np.arange(train_len)
         windows = indices[: window_size * self.n_windows].reshape(-1, self.n_windows)
-        window_edges = indices[:, [0, -1]]
+        window_edges = windows[:, [0, -1]]
+        window_edges[0, 0] += 1
         return windows, window_edges, window_size
 
     def __power_curve_points(self, windows, window_edges, window_size, y_tr):
-        return window_edges[:, 0] + 1, y_tr[windows].sum(axis=1) / window_size
+        return window_edges[:, 0], y_tr[windows].sum(axis=1) / window_size
 
     def __predict_n_rel(self, des_prob, n_docs, mu):
         return np.argmin(poisson.cdf(np.arange(n_docs) + 1, mu) < des_prob) + 1
