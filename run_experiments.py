@@ -15,6 +15,7 @@ import pandas as pd
 import argparse
 import numpy as np
 import copy
+import sys
 
 
 def run_al(name, budget, x, y_c, pool_size, policy, stoppings):
@@ -85,7 +86,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--policy", choices=["RS", "US"], help="active learning policy", default="RS"
     )
-
+    parser.add_argument(
+        "--debugging",
+        action="store_true",
+        help="if specified, the number of classes will be reduced,"
+        "tmt and multiprocessing will not be used. Option"
+        "--runs will also be ignored",
+    )
     args = parser.parse_args()
     np.random.seed(args.seed)
     pool_size = args.pool_size
@@ -151,6 +158,20 @@ if __name__ == "__main__":
     x, y = dataset.data[pool_idxs], dataset.target[pool_idxs].toarray()
     classes = np.arange(len(dataset.target_names))
     # classes = np.where(np.logical_and(y.mean(0) >= 0.002, y.mean(0) <= 0.2))[0]
+    if args.debugging:
+        classes = np.random.choice(classes, replace=False, size=45)
+        for cls in classes:
+            y_c = y[:, cls]
+            run_al(
+                dataset.target_names[cls],
+                pool_size,
+                x,
+                y_c,
+                pool_size,
+                policy,
+                stoppings,
+            )
+        sys.exit(0)
 
     # For debugging
     # classes = np.random.choice(classes, replace=False, size=45)
