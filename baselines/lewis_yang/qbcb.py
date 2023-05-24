@@ -32,7 +32,7 @@ class QBCB(StoppingStrategy):
         perm = (
             np.random.default_rng(42).permutation(np.vstack([np.arange(len(y)), y])).T
         )
-        if self.positive_sample_size <= y.sum():
+        if self.positive_sample_size >= y.sum():
             idx = len(y)
         else:
             idx = np.where(perm[:, 0].cumsum() == self.positive_sample_size)[0][0] + 1
