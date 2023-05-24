@@ -13,9 +13,7 @@ def extract_topic_did_label(path: str) -> pd.DataFrame:
 
 def from_text_to_tfidf(text: Iterable[str], is_files=False):
     if is_files:
-        return TfidfVectorizer(
-            max_df=0.9, input="filename", encoding="ISO-8859-1"
-        ).fit_transform(text)
+        return TfidfVectorizer(max_df=0.9, input="filename", encoding="ISO-8859-1").fit_transform(text)
     return TfidfVectorizer(max_df=0.9).fit_transform(text)
 
 

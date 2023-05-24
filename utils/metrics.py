@@ -32,15 +32,11 @@ class YangIdealizedCost:
 
     @staticmethod
     def with_expensive_training(initial_seed=2):
-        return YangIdealizedCost(
-            YangIdealizedCost.expensive_training, initial_seed, name="$Cost_e$"
-        )
+        return YangIdealizedCost(YangIdealizedCost.expensive_training, initial_seed, name="$Cost_e$")
 
     @staticmethod
     def with_minecore_like(initial_seed=2):
-        return YangIdealizedCost(
-            YangIdealizedCost.minecore_like, initial_seed, name="$Cost_m$"
-        )
+        return YangIdealizedCost(YangIdealizedCost.minecore_like, initial_seed, name="$Cost_m$")
 
     def evaluate(
         self,
@@ -58,13 +54,9 @@ class YangIdealizedCost:
         recall = y[annotated_at_stop].sum() / y.sum()
         recall_csum = y[annotated_order].cumsum() / y.sum()
         optimal_cost = np.where(recall_csum >= target_recall)[0][0] + 1
-        annotated_cost = (self.a_p * y[annotated_at_stop].sum()) + (
-            self.a_n * (~y[annotated_at_stop].astype(bool)).sum()
-        )
+        annotated_cost = (self.a_p * y[annotated_at_stop].sum()) + (self.a_n * (~y[annotated_at_stop].astype(bool)).sum())
         docs_to_target = optimal_cost - n_annotated
-        non_ann_cost = (self.b_p * y[remaining][:docs_to_target].sum()) + (
-            self.b_n * (~y[remaining][:docs_to_target].astype(bool)).sum()
-        )
+        non_ann_cost = (self.b_p * y[remaining][:docs_to_target].sum()) + (self.b_n * (~y[remaining][:docs_to_target].astype(bool)).sum())
         if recall >= target_recall:
             non_ann_cost = 0
         return annotated_cost + non_ann_cost
@@ -83,9 +75,7 @@ computed efficiently.
 
 def mdpa(a, b):
     assert len(a) == len(b), "histograms have to have the same length"
-    assert np.isclose(
-        sum(a), sum(b)
-    ), "histograms have to have the same mass (difference is $(sum(a)-sum(b))"
+    assert np.isclose(sum(a), sum(b)), "histograms have to have the same mass (difference is $(sum(a)-sum(b))"
 
     # algorithm 1 in [cha2002measuring]
     prefixsum = 0.0

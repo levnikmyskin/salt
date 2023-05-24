@@ -6,6 +6,4 @@ class BudgetStopping(KneeStopping):
         return "BudgetKnee"
 
     def _check_rho(self, current_rho, rho, num_docs, current_rels, n_assessed):
-        return (current_rho >= 6 and n_assessed >= 10 * num_docs / current_rels) or (
-            n_assessed >= num_docs * 0.75
-        )
+        return (current_rho >= 6 and n_assessed >= 10 * num_docs / current_rels) or (n_assessed >= num_docs * 0.75)

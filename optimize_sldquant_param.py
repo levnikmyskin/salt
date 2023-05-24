@@ -45,9 +45,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("-n", "--name", help="tmt save name", required=True)
     parser.add_argument("-s", "--seed", type=int, help="random seed")
-    parser.add_argument(
-        "-a", "--alpha", type=float, nargs="+", help="alpha values for SLD to test"
-    )
+    parser.add_argument("-a", "--alpha", type=float, nargs="+", help="alpha values for SLD to test")
 
     args = parser.parse_args()
     np.random.seed(args.seed)
@@ -60,11 +58,7 @@ if __name__ == "__main__":
     stoppings = []
     for t in args.target_recall:
         for alpha in args.alpha:
-            stoppings.append(
-                SLDQuantStopping(
-                    nstd=0.0, target_recall=t, dataset_length=pool_size, alpha=alpha
-                )
-            )
+            stoppings.append(SLDQuantStopping(nstd=0.0, target_recall=t, dataset_length=pool_size, alpha=alpha))
 
     print("Loading dataset...")
     dataset = load_dataset()

@@ -109,9 +109,7 @@ class KneeStopping(StoppingStrategy):
         # find indices for local maximums
         candidate_indices = []
         for i in range(1, data_size - 1):
-            if (differed_data[i - 1][1] < differed_data[i][1]) and (
-                differed_data[i][1] > differed_data[i + 1][1]
-            ):
+            if (differed_data[i - 1][1] < differed_data[i][1]) and (differed_data[i][1] > differed_data[i + 1][1]):
                 candidate_indices.append(i)
 
         # threshold

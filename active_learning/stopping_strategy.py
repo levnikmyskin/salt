@@ -19,9 +19,7 @@ class StoppingListener(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def on_new_batch(
-        self, x: Inputs, y: Labels, tr_idxs: Indices, val_idxs: Indices, batch: Indices
-    ):
+    def on_new_batch(self, x: Inputs, y: Labels, tr_idxs: Indices, val_idxs: Indices, batch: Indices):
         raise NotImplementedError
 
 

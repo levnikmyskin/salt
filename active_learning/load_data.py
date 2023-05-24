@@ -9,9 +9,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 
-pattern = re.compile(
-    r"(?P<policy>(ALvRS|ALvUS|ALvDS|PL))_idxs_checkpoint-(?P<checkpoint>\d+)_pool(?P<pool>\d+)_(?P<timestamp>\d+).pkl"
-)
+pattern = re.compile(r"(?P<policy>(ALvRS|ALvUS|ALvDS|PL))_idxs_checkpoint-(?P<checkpoint>\d+)_pool(?P<pool>\d+)_(?P<timestamp>\d+).pkl")
 
 
 @dataclass
@@ -40,9 +38,7 @@ def load_AL_data(
     sizes: Optional[Set[int]] = None,
     date: Optional[datetime] = None,
 ) -> Generator[ActiveLearningDataset, None, None]:
-    assert isinstance(
-        policy, ALPolicy
-    ), f"policy should be an instance of ALPolicy, got {type(policy)} instead"
+    assert isinstance(policy, ALPolicy), f"policy should be an instance of ALPolicy, got {type(policy)} instead"
     filters = [
         lambda f: f.policy == policy,
         lambda f: f.pool_size == len(pool_idxs),
@@ -62,17 +58,11 @@ def load_AL_data(
                 else:
                     val_idxs = set()
                 test_idxs = np.array(list(pool_idxs - set(train_idxs) - set(val_idxs)))
-                yield ActiveLearningDataset(
-                    train_idxs, val_idxs, test_idxs, file, label
-                )
+                yield ActiveLearningDataset(train_idxs, val_idxs, test_idxs, file, label)
 
 
-def filter_files(
-    files: Iterable[ALFileInfo], filters: Iterable[Callable[[ALFileInfo], bool]]
-):
-    return filter(
-        lambda f: all(fl(f) for fl in filters) if f is not None else False, files
-    )
+def filter_files(files: Iterable[ALFileInfo], filters: Iterable[Callable[[ALFileInfo], bool]]):
+    return filter(lambda f: all(fl(f) for fl in filters) if f is not None else False, files)
 
 
 def _get_info_from_filename(filename: str) -> Optional[ALFileInfo]:

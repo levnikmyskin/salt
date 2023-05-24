@@ -36,14 +36,10 @@ class BaseAnnotatingPolicy(ABC):
         self.clf = None
         self.probas = np.array([])
 
-    def get_next_batch(
-        self, x: Inputs, y: Labels, train_idxs: Indices, val_idxs: Indices, size: int
-    ) -> Indices:
+    def get_next_batch(self, x: Inputs, y: Labels, train_idxs: Indices, val_idxs: Indices, size: int) -> Indices:
         return self.rank_documents(x, y, train_idxs, val_idxs)
 
-    def rank_documents(
-        self, x: Inputs, y: Labels, train_idxs: Indices, val_idxs: Indices
-    ) -> Indices:
+    def rank_documents(self, x: Inputs, y: Labels, train_idxs: Indices, val_idxs: Indices) -> Indices:
         self.clf = self.classifier(*self.clf_args, **self.clf_kwargs)
         self.clf.fit(x[train_idxs], y[train_idxs])
         self.probas = self.clf.predict_proba(x)

@@ -29,20 +29,14 @@ if __name__ == "__main__":
     clf = LogisticRegression
     # clf = calibrated_svm
     policy = RelevancePolicy(clf, clf_args=[], clf_kwargs=clf_kwargs)
-    adj_sld = SLDQuantStopping(
-        target_recall=0.9, nstd=0.0, dataset_length=pool_size, alpha=0
-    )
-    listener = DistribPlotListener(
-        iter_save={3, 5, 10, 20}, save_path="plots/", name="test"
-    )
+    adj_sld = SLDQuantStopping(target_recall=0.9, nstd=0.0, dataset_length=pool_size, alpha=0)
+    listener = DistribPlotListener(iter_save={3, 5, 10, 20}, save_path="plots/", name="test")
     adj_sld.attach_listener(listener)
     stoppings = [adj_sld]
 
     print("Loading dataset...")
     dataset = fetch_rcv1()
-    pool_idxs = np.random.choice(
-        np.arange(dataset.data.shape[0]), replace=False, size=pool_size
-    )
+    pool_idxs = np.random.choice(np.arange(dataset.data.shape[0]), replace=False, size=pool_size)
 
     x, y = dataset.data[pool_idxs], dataset.target[pool_idxs].toarray()
     # classes = np.arange(len(dataset.target_names))

@@ -7,9 +7,7 @@ import numpy as np
 SEED = 42
 
 
-pattern = re.compile(
-    r"(?P<policy>(ALvUS|ALvRS|PL|ALvDS))_(?P<label>.+)_(?P<size>\d+)size_(?P<classifier>.+)_results\.pkl"
-)
+pattern = re.compile(r"(?P<policy>(ALvUS|ALvRS|PL|ALvDS))_(?P<label>.+)_(?P<size>\d+)size_(?P<classifier>.+)_results\.pkl")
 
 
 class ALPolicy(enum.Enum):
@@ -41,44 +39,32 @@ class ALPolicy(enum.Enum):
             return "ALvDS"
 
 
-def random_dataset_with_given_prevalences(
-    x, y, tr_prev, te_prev, tr_size, te_size, seed=None, return_idxs=False
-):
+def random_dataset_with_given_prevalences(x, y, tr_prev, te_prev, tr_size, te_size, seed=None, return_idxs=False):
     tr_pos_to_take = round(tr_size * tr_prev)
     tr_neg_to_take = abs(tr_size - tr_pos_to_take)
     te_pos_to_take = round(te_size * te_prev)
     te_neg_to_take = abs(te_pos_to_take - te_size)
 
-    x_tr, y_tr, tr_idxs = __get_xy_with_given_pos_and_negs(
-        x, y, tr_pos_to_take, tr_neg_to_take, seed
-    )
+    x_tr, y_tr, tr_idxs = __get_xy_with_given_pos_and_negs(x, y, tr_pos_to_take, tr_neg_to_take, seed)
 
     te_indices = set(np.arange(y.shape[0])) - set(tr_idxs)
     if not return_idxs:
         x_te, y_te = x[list(te_indices)], y[list(te_indices)]
-        x_te, y_te, _ = __get_xy_with_given_pos_and_negs(
-            x_te, y_te, te_pos_to_take, te_neg_to_take, seed
-        )
+        x_te, y_te, _ = __get_xy_with_given_pos_and_negs(x_te, y_te, te_pos_to_take, te_neg_to_take, seed)
         return x_tr, y_tr, x_te, y_te
     return tr_idxs, np.array(list(te_indices))
 
 
 def random_sample_from_dataset(x, y, tr_size: int, seed=None):
     indices = np.arange(y.shape[0])
-    training_idxs = np.random.default_rng(seed=seed).choice(
-        indices, size=tr_size, replace=False
-    )
+    training_idxs = np.random.default_rng(seed=seed).choice(indices, size=tr_size, replace=False)
     test_idxs = list(set(indices) - set(training_idxs))
     return x[training_idxs], y[training_idxs], x[test_idxs], y[test_idxs]
 
 
 def __get_xy_with_given_pos_and_negs(x, y, pos_to_take, neg_to_take, seed):
-    positives = np.random.default_rng(seed=seed).choice(
-        np.where(y == 1)[0], size=pos_to_take, replace=False
-    )
-    negatives = np.random.default_rng(seed=seed).choice(
-        np.where(y == 0)[0], size=neg_to_take, replace=False
-    )
+    positives = np.random.default_rng(seed=seed).choice(np.where(y == 1)[0], size=pos_to_take, replace=False)
+    negatives = np.random.default_rng(seed=seed).choice(np.where(y == 0)[0], size=neg_to_take, replace=False)
     idxs = np.hstack((positives, negatives))
     np.random.default_rng().shuffle(idxs)
     return x[idxs], y[idxs], idxs

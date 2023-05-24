@@ -80,12 +80,8 @@ if __name__ == "__main__":
     )
     parser.add_argument("-n", "--name", help="tmt save name", required=True)
     parser.add_argument("-s", "--seed", type=int, help="random seed")
-    parser.add_argument(
-        "-r", "--runs", type=int, default=20, help="number of random runs"
-    )
-    parser.add_argument(
-        "--policy", choices=["RS", "US"], help="active learning policy", default="RS"
-    )
+    parser.add_argument("-r", "--runs", type=int, default=20, help="number of random runs")
+    parser.add_argument("--policy", choices=["RS", "US"], help="active learning policy", default="RS")
     parser.add_argument(
         "--debugging",
         action="store_true",
@@ -122,12 +118,8 @@ if __name__ == "__main__":
 
         ipp = sneyd_stevenson.IPP(target_recall=t)
 
-        adj_sld = SLDQuantStopping(
-            target_recall=t, nstd=0.0, dataset_length=pool_size, use_margin=False
-        )
-        adj_sld_m = SLDQuantStopping(
-            target_recall=t, nstd=0.0, dataset_length=pool_size, use_margin=True
-        )
+        adj_sld = SLDQuantStopping(target_recall=t, nstd=0.0, dataset_length=pool_size, use_margin=False)
+        adj_sld_m = SLDQuantStopping(target_recall=t, nstd=0.0, dataset_length=pool_size, use_margin=True)
         adj_sld_1 = copy.deepcopy(adj_sld)
         adj_sld_1.nstd = 1
         adj_sld_2 = copy.deepcopy(adj_sld)
@@ -151,9 +143,7 @@ if __name__ == "__main__":
 
     print("Loading dataset...")
     dataset = fetch_rcv1()
-    pool_idxs = np.random.choice(
-        np.arange(dataset.data.shape[0]), replace=False, size=pool_size
-    )
+    pool_idxs = np.random.choice(np.arange(dataset.data.shape[0]), replace=False, size=pool_size)
 
     x, y = dataset.data[pool_idxs], dataset.target[pool_idxs].toarray()
     classes = np.arange(len(dataset.target_names))

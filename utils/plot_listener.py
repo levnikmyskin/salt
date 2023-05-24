@@ -32,9 +32,7 @@ class RecallPlotListener(StoppingListener):
         self.num_annotateds.append(len(tr_idxs))
         self.val_len = len(val_idxs)
 
-    def on_new_batch(
-        self, x: Inputs, y: Labels, tr_idxs: Indices, val_idxs: Indices, batch: Indices
-    ):
+    def on_new_batch(self, x: Inputs, y: Labels, tr_idxs: Indices, val_idxs: Indices, batch: Indices):
         pass
 
     def plot(self):
@@ -44,9 +42,7 @@ class RecallPlotListener(StoppingListener):
         clf_rec = [r[1] for r in self.est_recalls]
         ax.plot(self.num_annotateds, sld_rec, label="$\hat{R} \ SLD$")
         ax.plot(self.num_annotateds, clf_rec, label="$\hat{R} \ CLF$")
-        plt.suptitle(
-            f"{self.name}; Val size: {self.val_len}. Rec: {self.recalls[-1]:.3}"
-        )
+        plt.suptitle(f"{self.name}; Val size: {self.val_len}. Rec: {self.recalls[-1]:.3}")
         fig.tight_layout()
         plt.legend()
         plt.show()
@@ -94,10 +90,7 @@ class DistribPlotListener(RecallPlotListener):
             log_scale=(False, True),
             element="step",
         )
-        plt.title(
-            r"$\mathrm{Pr}(y=1|x)$ histogram for AL and $Rand$ classifier. $|\mathcal{L}| = %d$"
-            % (iteration * 100)
-        )
+        plt.title(r"$\mathrm{Pr}(y=1|x)$ histogram for AL and $Rand$ classifier. $|\mathcal{L}| = %d$" % (iteration * 100))
         plt.savefig(os.path.join(self.save_path, f"iteration_{iteration}.png"))
         plt.close()
         print(f"iteration {iteration} completed.")

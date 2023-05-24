@@ -19,9 +19,7 @@ def latex_table_it_recall(stoppings, target_rec=0.8):
         for ss in stoppings:
             if str(ss) not in s:
                 s[str(ss)] = {"it": 100, "recall": 1.0}
-            s[str(ss)]["it"] = (
-                s[str(ss)]["it"] if type(s[str(ss)]["it"]) is int else 100
-            )
+            s[str(ss)]["it"] = s[str(ss)]["it"] if type(s[str(ss)]["it"]) is int else 100
             s[str(ss)]["cost"] = cost.evaluate(
                 LinearStrategy(b=100),
                 v["idxs"][0],
@@ -49,18 +47,13 @@ def latex_table_it_recall(stoppings, target_rec=0.8):
         s = " & ".join(f'{int(row[o]["cost"])} & {row[o]["recall"]:.3f}' for o in order)
         buf.append(f"\t{row['class']} & {s}")
 
-    avgs = {
-        k: {"cost": v["cost"] / len(res), "recall": v["recall"] / len(res)}
-        for k, v in avgs.items()
-    }
+    avgs = {k: {"cost": v["cost"] / len(res), "recall": v["recall"] / len(res)} for k, v in avgs.items()}
     with open("evaluations/it_recall_template.tex", "r") as f:
         temp = string.Template(f.read())
     return temp.substitute(
         class_results=" \\\\ \n".join(buf),
         avg_results=" & ".join(
-            f'{round(avgs[o][k], 3) if k == "recall" else round(avgs[o][k], 0)}'
-            for o in order
-            for k in ["cost", "recall"]
+            f'{round(avgs[o][k], 3) if k == "recall" else round(avgs[o][k], 0)}' for o in order for k in ["cost", "recall"]
         ),
     )
 
@@ -75,16 +68,10 @@ def compute_tar_metrics(res, cost, target_recall=0.9, max_it=100):
         for method, r in vals["stops"].items():
             if "@" in method and f"@ {target_recall:.2f}" not in method:
                 continue
-            d.setdefault((method, "MSE"), []).append(
-                mean_square_error(target_recall, r["recall"])
-            )
-            d.setdefault((method, "RE"), []).append(
-                relative_error(target_recall, r["recall"])
-            )
+            d.setdefault((method, "MSE"), []).append(mean_square_error(target_recall, r["recall"]))
+            d.setdefault((method, "RE"), []).append(relative_error(target_recall, r["recall"]))
             it = r["it"] if r["it"] != np.inf else max_it
-            d.setdefault((method, "Cost"), []).append(
-                cost.evaluate(LinearStrategy(b=100), tr_idxs, y_c, it, target_recall)
-            )
+            d.setdefault((method, "Cost"), []).append(cost.evaluate(LinearStrategy(b=100), tr_idxs, y_c, it, target_recall))
     return pd.DataFrame(d).set_index(np.array(list(classes.keys()))), pd.Series(classes)
 
 
@@ -99,11 +86,7 @@ def compute_different_cost_structures(res, cost_structs, target_recall=0.9):
             if "@" in method and f"@ {target_recall:.2f}" not in method:
                 continue
             for cs in cost_structs:
-                d.setdefault((method, cs.name), []).append(
-                    cs.evaluate(
-                        LinearStrategy(b=100), tr_idxs, y_c, r["it"], target_recall
-                    )
-                )
+                d.setdefault((method, cs.name), []).append(cs.evaluate(LinearStrategy(b=100), tr_idxs, y_c, r["it"], target_recall))
     return pd.DataFrame(d).set_index(np.array(list(classes.keys()))), pd.Series(classes)
 
 
@@ -173,9 +156,7 @@ def boxplots(res, target_rec, legend_loc="lower right", d_name="RCV1-v2"):
         "BudgetKnee": "Budget",
     }
     plt.figure(figsize=(12, 10))
-    ax = sns.boxplot(
-        data=d.rename(columns=mapper)[list(mapper.values())].sort_index(axis=1)
-    )
+    ax = sns.boxplot(data=d.rename(columns=mapper)[list(mapper.values())].sort_index(axis=1))
     xl = np.linspace(*ax.get_xlim(), len(ax.get_xticks()))
     ax.plot(xl, [target_rec] * len(xl), label="Target recall")
     plt.title(f"Estimated recall. Target recall = {target_rec}. Dataset {d_name}")
@@ -188,9 +169,7 @@ def proc(t):
     dm, cm = compute_tar_metrics(res, YangIdealizedCost(), t)
     dc, cc = compute_different_cost_structures(res, cost_structs, target_recall=t)
     r1 = latex_results(dm, cm, exclude=re.compile(r"Quant(CI)? 1"), target_rec=t)
-    r2 = latex_results(
-        dc, cc, exclude=re.compile(r"Quant(CI)? 1"), target_rec=t, precision=0
-    )
+    r2 = latex_results(dc, cc, exclude=re.compile(r"Quant(CI)? 1"), target_rec=t, precision=0)
     return t, r1, r2
 
 

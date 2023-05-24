@@ -9,14 +9,8 @@ def elaborate_topic(topic, qrel, text_path, saving_path, text_dids):
     dids = set(d for d in qrel[qrel.topic == topic].did if d in text_dids)
     if not dids:
         return
-    x = from_text_to_tfidf(
-        map(lambda d: os.path.join(text_path, str(d).zfill(6)), dids), is_files=True
-    )
-    y = (
-        qrel[(qrel.topic == topic) & (qrel.did.isin(dids))]
-        .drop_duplicates("did")
-        .label.to_numpy()
-    )
+    x = from_text_to_tfidf(map(lambda d: os.path.join(text_path, str(d).zfill(6)), dids), is_files=True)
+    y = qrel[(qrel.topic == topic) & (qrel.did.isin(dids))].drop_duplicates("did").label.to_numpy()
     with open(os.path.join(saving_path, f"{topic}.pkl"), "wb") as f:
         pickle.dump((x, y), f)
 
@@ -43,11 +37,7 @@ if __name__ == "__main__":
     with concurrent.futures.ProcessPoolExecutor(jobs) as p:
         futures = []
         for topic in qrel.topic.unique():
-            futures.append(
-                p.submit(
-                    elaborate_topic, topic, qrel, text_path, saving_path, text_dids
-                )
-            )
+            futures.append(p.submit(elaborate_topic, topic, qrel, text_path, saving_path, text_dids))
 
         for _ in tqdm(concurrent.futures.as_completed(futures), total=len(futures)):
             _.result()

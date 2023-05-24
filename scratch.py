@@ -27,16 +27,12 @@ def plot_cluster_with_pos(title, x_svd, cluster_preds, y, idx_to_plot, idx_annot
             c=cluster_preds[idx_to_plot],
             alpha=0.2,
         )
-        plt.scatter(
-            x_svd[idx_to_plot, 0][y_idxs], x_svd[idx_to_plot, 1][y_idxs], c="red"
-        )
+        plt.scatter(x_svd[idx_to_plot, 0][y_idxs], x_svd[idx_to_plot, 1][y_idxs], c="red")
     else:
         plt.scatter(x_svd[:, 0], x_svd[:, 1], c=cluster_preds, alpha=0.2)
         plt.scatter(x_svd[y == 1, 0], x_svd[y == 1, 1], c="red")
     if idx_annotated is not None:
-        plt.scatter(
-            x_svd[idx_annotated, 0], x_svd[idx_annotated, 1], c="brown", alpha=0.8
-        )
+        plt.scatter(x_svd[idx_annotated, 0], x_svd[idx_annotated, 1], c="brown", alpha=0.8)
         plt.scatter(
             x_svd[idx_annotated, 0][y[idx_annotated] == 1],
             x_svd[idx_annotated, 1][y[idx_annotated] == 1],
@@ -66,9 +62,7 @@ def run_on_fake_data(sample_size=10_000):
     init_s = np.concatenate((random_pos, random))
     train_idxs = list(init_s)
     for _ in tqdm(range(5)):
-        clf = calibrated_svm(
-            n_jobs=20, ensemble=False, cv=min(y_c[train_idxs].sum(), 10)
-        )
+        clf = calibrated_svm(n_jobs=20, ensemble=False, cv=min(y_c[train_idxs].sum(), 10))
         # clf = LogisticRegression(n_jobs=20)
         clf.fit(x[train_idxs], y_c[train_idxs])
         sort_preds = (-clf.predict_proba(x)[:, 1]).argsort()
@@ -101,12 +95,8 @@ def run_on_fake_data(sample_size=10_000):
     colors = ["#4EACC5", "#fc79fc", "#FF9C34", "#af62f7"]
     tr_colors = ["#4E6FC4", "m", "#FF7D32", "#6f00d8"]
     tr_alphas = [0.6, 1.0, 0.6, 1.0]
-    min_xs = sorted(
-        ((x[clusters == i, 0].mean(), i) for i in set(clusters)), key=lambda k: k[0]
-    )
-    min_ys = sorted(
-        ((x[clusters == i, 1].mean(), i) for i in set(clusters)), key=lambda k: k[0]
-    )
+    min_xs = sorted(((x[clusters == i, 0].mean(), i) for i in set(clusters)), key=lambda k: k[0])
+    min_ys = sorted(((x[clusters == i, 1].mean(), i) for i in set(clusters)), key=lambda k: k[0])
     fig1 = plt.figure(1, figsize=(12, 10))
     fig2 = plt.figure(2, figsize=(12, 10))
     ax1 = fig1.add_subplot()
@@ -114,9 +104,7 @@ def run_on_fake_data(sample_size=10_000):
     for c in set(clusters):
         cl_ids = clusters[test_idxs] == c
         rand_cl = clusters[rand_tr] == c
-        ax1.scatter(
-            x[test_idxs, 0][cl_ids], x[test_idxs, 1][cl_ids], c=colors[c], alpha=0.2
-        )
+        ax1.scatter(x[test_idxs, 0][cl_ids], x[test_idxs, 1][cl_ids], c=colors[c], alpha=0.2)
         ax1.scatter(
             x[train_idxs, 0][clusters[train_idxs] == c],
             x[train_idxs, 1][clusters[train_idxs] == c],
@@ -124,9 +112,7 @@ def run_on_fake_data(sample_size=10_000):
             c=tr_colors[c],
             alpha=tr_alphas[c],
         )
-        ax2.scatter(
-            x[test_idxs, 0][cl_ids], x[test_idxs, 1][cl_ids], c=colors[c], alpha=0.2
-        )
+        ax2.scatter(x[test_idxs, 0][cl_ids], x[test_idxs, 1][cl_ids], c=colors[c], alpha=0.2)
         ax2.scatter(
             x[rand_tr, 0][rand_cl],
             x[rand_tr, 1][rand_cl],

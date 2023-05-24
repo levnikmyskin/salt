@@ -105,15 +105,11 @@ def do_plot(policy, cls, y_c, x_svd, idx, initial_idxs):
         axin.set_xticklabels([])
         axin.set_yticklabels([])
         ax.indicate_inset_zoom(axin, edgecolor="black")
-    fig.suptitle(
-        f"{policy}. # Annotations: {(len(idx) - 1000) or 1000}; RCV1-v2 class: {cls}"
-    )
+    fig.suptitle(f"{policy}. # Annotations: {(len(idx) - 1000) or 1000}; RCV1-v2 class: {cls}")
     plt.legend(loc="lower left")
     fig.tight_layout()
     if args.save_path:
-        fig.savefig(
-            os.path.join(args.save_path, f"lsa_plot_{policy}_{cls}_ann-{len(idx)}.png")
-        )
+        fig.savefig(os.path.join(args.save_path, f"lsa_plot_{policy}_{cls}_ann-{len(idx)}.png"))
     else:
         plt.show()
     plt.close()
@@ -165,12 +161,8 @@ if __name__ == "__main__":
         type=int,
         help="use n random classes. -c must not be specified",
     )
-    parser.add_argument(
-        "-j", "--jobs", type=int, help="if -1 use one process for each class"
-    )
-    parser.add_argument(
-        "--load-path", help="loading path", default=".data/active_learning"
-    )
+    parser.add_argument("-j", "--jobs", type=int, help="if -1 use one process for each class")
+    parser.add_argument("--load-path", help="loading path", default=".data/active_learning")
     parser.add_argument("--save-path", help="saving path for plot")
     parser.add_argument("-p", "--policy", choices=["RS", "US", "PL"], nargs="+")
     parser.add_argument("-s", "--sizes", type=int, nargs="+")
@@ -178,9 +170,7 @@ if __name__ == "__main__":
     parser.add_argument("--plot-rand", action="store_true")
     args = parser.parse_args()
 
-    assert (args.rclass is not None) ^ (
-        args.randclass is not None
-    ), "only one of -c or -r can be specified"
+    assert (args.rclass is not None) ^ (args.randclass is not None), "only one of -c or -r can be specified"
 
     if args.save_path:
         os.makedirs(args.save_path, exist_ok=True)
@@ -189,20 +179,14 @@ if __name__ == "__main__":
     x_svd = TruncatedSVD().fit_transform(x)
     possible_classes = list(set(flatten(pairs)))
     y = rcv1.target[:100_000].toarray().squeeze()
-    r_classes = (
-        random.sample(possible_classes, k=args.randclass)
-        if args.randclass
-        else args.rclass
-    )
+    r_classes = random.sample(possible_classes, k=args.randclass) if args.randclass else args.rclass
 
     jobs = len(r_classes) if args.jobs == -1 else args.jobs
     with concurrent.futures.ProcessPoolExecutor(jobs) as pool:
         futures = []
         for cls in r_classes:
             cls_idx = rcv1.target_names.tolist().index(cls)
-            futures.append(
-                pool.submit(parallel_plot, cls, y[:, cls_idx], args.policy, x_svd)
-            )
+            futures.append(pool.submit(parallel_plot, cls, y[:, cls_idx], args.policy, x_svd))
 
         for f in tqdm(concurrent.futures.as_completed(futures), total=len(futures)):
             f.result()

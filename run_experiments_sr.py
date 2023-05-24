@@ -6,9 +6,7 @@ if __name__ == "__main__":
     import os
 
     paper_name = ""
-    parser = argparse.ArgumentParser(
-        f"Run experiments for paper {paper_name}. CLEF 2019 dataset."
-    )
+    parser = argparse.ArgumentParser(f"Run experiments for paper {paper_name}. CLEF 2019 dataset.")
     parser.add_argument("-j", "--jobs", type=int, help="number of processes to spawn")
     parser.add_argument("-d", "--description", help="experiment description for tmt")
     parser.add_argument("-lrj", "--lr-j", type=int, help="number of jobs for the LR")
@@ -31,12 +29,8 @@ if __name__ == "__main__":
     )
     parser.add_argument("-n", "--name", help="tmt save name", required=True)
     parser.add_argument("-s", "--seed", type=int, help="random seed")
-    parser.add_argument(
-        "-r", "--runs", type=int, default=20, help="number of random runs"
-    )
-    parser.add_argument(
-        "--policy", choices=["RS", "US"], help="active learning policy", default="RS"
-    )
+    parser.add_argument("-r", "--runs", type=int, default=20, help="number of random runs")
+    parser.add_argument("--policy", choices=["RS", "US"], help="active learning policy", default="RS")
 
     args = parser.parse_args()
     sr_path_tr = ".data/sr/2019_only/training"
@@ -67,12 +61,8 @@ if __name__ == "__main__":
                 with open(path, "rb") as f:
                     x, y = pickle.load(f)
                 stoppings = [
-                    cormack_knee.KneeStopping(
-                        target_recall=args.target_recall, min_rounds=0
-                    ),
-                    cormack_knee.BudgetStopping(
-                        target_recall=args.target_recall, min_rounds=0
-                    ),
+                    cormack_knee.KneeStopping(target_recall=args.target_recall, min_rounds=0),
+                    cormack_knee.BudgetStopping(target_recall=args.target_recall, min_rounds=0),
                 ]
                 for t in args.target_recall:
                     quant = lewis_yang.QuantStopping(target_recall=t, min_rounds=0)
@@ -84,9 +74,7 @@ if __name__ == "__main__":
 
                     ipp = sneyd_stevenson.IPP(target_recall=t)
 
-                    adj_sld = SLDQuantStopping(
-                        target_recall=t, nstd=0.0, dataset_length=len(y), min_rounds=0
-                    )
+                    adj_sld = SLDQuantStopping(target_recall=t, nstd=0.0, dataset_length=len(y), min_rounds=0)
                     adj_sld_m = SLDQuantStopping(
                         target_recall=t,
                         nstd=0.0,
@@ -98,9 +86,7 @@ if __name__ == "__main__":
                     adj_sld_2 = copy.deepcopy(adj_sld)
                     adj_sld_2.nstd = 2
 
-                    chm = callaghan_chm.CHMStopping(
-                        target_recall=t, dataset_length=len(y), min_rounds=0
-                    )
+                    chm = callaghan_chm.CHMStopping(target_recall=t, dataset_length=len(y), min_rounds=0)
                     stoppings.extend(
                         (
                             quant,
