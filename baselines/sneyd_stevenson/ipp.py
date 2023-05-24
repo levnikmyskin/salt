@@ -36,8 +36,8 @@ class IPP(StoppingStrategy):
     ) -> bool:
         if i < self.min_rounds or y[train_idxs].sum() < self.min_pos:
             return False
-        windows, window_size = self.__make_windows(len(train_idxs))
-        x_p, y_p = self.__power_curve_points(windows, window_size, y[train_idxs])
+        windows, window_edges, window_size = self.__make_windows(len(train_idxs))
+        x_p, y_p = self.__power_curve_points(windows, window_edges, window_size, y[train_idxs])
         try:
             p0 = [0.1, 0.001]
             (a, k), pcov = curve_fit(model_func_power, x_p, y_p, p0)
@@ -58,15 +58,15 @@ class IPP(StoppingStrategy):
         return round(np.sum(y3))
 
     def __make_windows(self, train_len: int):
-        window_size = round(train_len / self.n_windows)
-        # train_len - 1 and windows_size + 1 used for correct indexing
-        # eg. if train_len == 100 and n_windows == 10, then we create
-        # np.linspace(0, 99, 11) -> [0, 9, 19, 29, ... ,99]
-        windows = np.linspace(0, train_len - 1, window_size + 1)
-        return sliding_window_view(windows, 2), window_size
+        # In the original code, the last group is discarded.
+        window_size = train_len // self.n_windows
+        indices = np.arange(train_len)
+        windows = indices[: window_size * self.n_windows].reshape(-1, self.n_windows)
+        window_edges = indices[:, [0, -1]]
+        return windows, window_edges, window_size
 
-    def __power_curve_points(self, windows, window_size, y_tr):
-        return windows[:, 0] + 1, y_tr[windows].sum(axis=1) / window_size
+    def __power_curve_points(self, windows, window_edges, window_size, y_tr):
+        return window_edges[:, 0] + 1, y_tr[windows].sum(axis=1) / window_size
 
     def __predict_n_rel(self, des_prob, n_docs, mu):
         return np.argmin(poisson.cdf(np.arange(n_docs) + 1, mu) < des_prob) + 1
