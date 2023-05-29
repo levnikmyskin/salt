@@ -73,4 +73,4 @@ class IPP(StoppingStrategy):
         return np.argmin(poisson.cdf(np.arange(n_docs) + 1, mu) < des_prob) + 1
 
     def __str__(self):
-        return "IPP"
+        return f"IPP @ {self.target_recall}"

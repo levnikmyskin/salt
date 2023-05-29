@@ -1,7 +1,9 @@
 import enum
 import itertools
 import re
-from typing import Optional, Set, Match
+from typing import Optional, Set, Match, Generator
+from tmt import TmtManager
+from numpy.typing import NDArray
 import numpy as np
 
 SEED = 42
@@ -111,3 +113,26 @@ def aggregate_same_sizes(policy, classifier, file_list, sizes, labels):
         size_f = aggregated.setdefault(int(match.group("size")), [])
         size_f.append(file)
     return aggregated
+
+
+class PreviousRunUtils:
+    def __init__(self, name: str):
+        self.manager = TmtManager()
+        self.manager.set_entry_by_name(name)
+        self.results = list(self.manager.load_results())[0][1]
+        self.class_runs = {}
+
+    def get_idxs_iter(self) -> Generator[list[int], None, None]:
+        for cls_, data in self.results.items():
+            yield cls_, data["idxs"], data["y_c"]
+
+    def get_idxs(self, cls_: str, run: Optional[int] = None) -> list[int]:
+        if run is None:
+            run = self.class_runs.setdefault(cls_, -1) + 1
+            self.class_runs[cls_] = run
+        self.results[f"{cls_}_{run}"]["idxs"][0]
+
+    def get_qbcb_sample(self, recall: str, cls_run: str) -> (NDArray[int], NDArray[int]):
+        sample = self.results[f"{cls_run}"][f"QBCB@{recall} presample"]
+        pre = self.results[f"{cls_run}"][f"QBCB@{recall} prepositives"]
+        return sample, pre

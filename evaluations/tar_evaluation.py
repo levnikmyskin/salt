@@ -86,6 +86,7 @@ def compute_different_cost_structures(res, cost_structs, target_recall=0.9):
             if "@" in method and f"@ {target_recall:.2f}" not in method:
                 continue
             for cs in cost_structs:
+                # if 'qbcb' in method.lower()
                 d.setdefault((method, cs.name), []).append(cs.evaluate(LinearStrategy(b=100), tr_idxs, y_c, r["it"], target_recall))
     return pd.DataFrame(d).set_index(np.array(list(classes.keys()))), pd.Series(classes)
 
@@ -179,7 +180,7 @@ if __name__ == "__main__":
     import re
 
     manager = TmtManager()
-    manager.set_entry_by_name("rcv1_exp_t809095_withrecallmargin_allclasses")
+    manager.set_entry_by_name("rcv1_sneid_qbcb_rs")
     res = {k: v for k, v in next(manager.load_results())[1].items() if "y_c" in v}
     cost_structs = [
         YangIdealizedCost(),

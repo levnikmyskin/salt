@@ -54,12 +54,15 @@ class YangIdealizedCost:
         recall = y[annotated_at_stop].sum() / y.sum()
         recall_csum = y[annotated_order].cumsum() / y.sum()
         optimal_cost = np.where(recall_csum >= target_recall)[0][0] + 1
-        annotated_cost = (self.a_p * y[annotated_at_stop].sum()) + (self.a_n * (~y[annotated_at_stop].astype(bool)).sum())
+        annotated_cost = self.costs_of_annotated_docs(y[annotated_at_stop])
         docs_to_target = optimal_cost - n_annotated
         non_ann_cost = (self.b_p * y[remaining][:docs_to_target].sum()) + (self.b_n * (~y[remaining][:docs_to_target].astype(bool)).sum())
         if recall >= target_recall:
             non_ann_cost = 0
         return annotated_cost + non_ann_cost
+
+    def costs_of_annotated_docs(self, y: NDArray[int]) -> float:
+        return self.a_p * y.sum() + (self.a_n * (~y.astype(bool)).sum())
 
     def __str__(self):
         return self.name

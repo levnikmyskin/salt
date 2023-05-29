@@ -65,4 +65,4 @@ class QBCB(StoppingStrategy):
         return len(np.intersect1d(train_idxs, self.pre_positives)) >= j
 
     def __str__(self):
-        return "QBCB"
+        return f"QBCB @ {self.target_recall}"

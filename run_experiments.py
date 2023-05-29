@@ -56,7 +56,7 @@ def calibrated_svm(**kwargs):
 
 
 if __name__ == "__main__":
-    paper_name = ""
+    paper_name = "SALt"
     parser = argparse.ArgumentParser(f"Run experiments for paper {paper_name}")
     parser.add_argument("-j", "--jobs", type=int, help="number of processes to spawn")
     parser.add_argument("-lrj", "--lr-j", type=int, help="number of jobs for the LR")

@@ -58,3 +58,21 @@ class RelevancePolicy(BaseAnnotatingPolicy):
 class UncertaintyPolicy(BaseAnnotatingPolicy):
     def sort_probas(self) -> Indices:
         return (-(0.5 - self.probas[:, 1])).argsort()
+
+
+class PreviousRunPolicy(BaseAnnotatingPolicy):
+    """
+    Not really a policy. This class receives a list of indices, in the order
+    annotated by another (real) policy ran before, and then simply gives it back
+    every time it's asked to annotate a batch.
+    """
+
+    def __init__(self, annotated_idxs):
+        self.annotated_idxs = annotated_idxs
+        super().__init__(classifier=None, clf_args=None, clf_kwargs=None)
+
+    def get_next_batch(self, _x, _y, _train_idxs, _val_idxs, _size) -> Indices:
+        return self.annotated_idxs
+
+    def sort_probas(self) -> Indices:
+        raise NotImplementedError("PreviousRunPolicy cannot sort probabilities")
