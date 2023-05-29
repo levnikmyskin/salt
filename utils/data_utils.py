@@ -124,7 +124,7 @@ class PreviousRunUtils:
 
     def get_idxs_iter(self) -> Generator[list[int], None, None]:
         for cls_, data in self.results.items():
-            yield cls_, data["idxs"], data["y_c"]
+            yield cls_, data.get("idxs", []), data["y_c"]
 
     def get_idxs(self, cls_: str, run: Optional[int] = None) -> list[int]:
         if run is None:

@@ -7,15 +7,13 @@ def run_al(name, budget, y_c, pool_size, policy, stoppings):
     res = {}
     if y_c.sum() < 2:
         return name, {}
-    random_pos = np.random.choice(np.where(y_c == 1)[0], size=1)
-    random = np.random.choice(np.where(y_c == 0)[0], replace=False, size=1)
     conf = ActiveLearningConfig(
         policy,
         stoppings,
         LinearStrategy(b=100),
         np.arange(len(y_c)),
         y_c,
-        np.concatenate((random_pos, random)),
+        np.array([]),
         stop_when_no_pos=False,
     )
     al = ActiveLearning(conf)
@@ -76,6 +74,9 @@ if __name__ == "__main__":
     with ProcessPoolExecutor(max_workers=jobs) as p:
         futures = []
         for cls_, idxs, y_c in prev_util.get_idxs_iter():
+            if not idxs:
+                continue
+            idxs = idxs[0]
             prev_policy = PreviousRunPolicy(annotated_idxs=idxs)
             for qb in filter(lambda s: type(s) is lewis_yang.QBCB, stoppings):
                 for recall in args.target_recall:
