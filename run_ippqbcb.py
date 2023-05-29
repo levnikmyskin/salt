@@ -64,6 +64,22 @@ if __name__ == "__main__":
     classes = np.arange(len(dataset.target_names))
     prev_util = PreviousRunUtils(args.previous)
 
+    if args.debugging:
+        for cls_, idxs, y_c in prev_util.get_idxs_iter():
+            if not idxs:
+                continue
+            idxs = idxs[0]
+            prev_policy = PreviousRunPolicy(annotated_idxs=idxs)
+            for qb in filter(lambda s: type(s) is lewis_yang.QBCB, stoppings):
+                for recall in args.target_recall:
+                    if qb.target_recall == recall:
+                        sample, possample = prev_util.get_qbcb_sample(recall, cls_)
+                        qb.pre_sample = sample
+                        qb.pre_positives = possample
+            run_al(cls_, len(y_c), copy.deepcopy(y_c), len(y_c), copy.deepcopy(prev_policy), copy.deepcopy(stoppings))
+
+        sys.exit(0)
+
     # For debugging
     # classes = np.random.choice(classes, replace=False, size=45)
     recorder = tmt_recorder(args.name, description=args.description)(process_futures)
