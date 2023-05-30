@@ -70,12 +70,10 @@ if __name__ == "__main__":
                 continue
             idxs = idxs[0]
             prev_policy = PreviousRunPolicy(annotated_idxs=idxs)
+            sample, possample = prev_util.get_qbcb_sample(cls_)
             for qb in filter(lambda s: type(s) is lewis_yang.QBCB, stoppings):
-                for recall in args.target_recall:
-                    if qb.target_recall == recall:
-                        sample, possample = prev_util.get_qbcb_sample(recall, cls_)
-                        qb.pre_sample = sample
-                        qb.pre_positives = possample
+                qb.pre_sample = sample
+                qb.pre_positives = possample
             run_al(cls_, len(y_c), copy.deepcopy(y_c), len(y_c), copy.deepcopy(prev_policy), copy.deepcopy(stoppings))
 
         sys.exit(0)
@@ -94,7 +92,7 @@ if __name__ == "__main__":
                 continue
             idxs = idxs[0]
             prev_policy = PreviousRunPolicy(annotated_idxs=idxs)
-            sample, possample = prev_util.get_qbcb_sample(recall, cls_)
+            sample, possample = prev_util.get_qbcb_sample(cls_)
             for qb in filter(lambda s: type(s) is lewis_yang.QBCB, stoppings):
                 qb.pre_sample = sample
                 qb.pre_positives = possample

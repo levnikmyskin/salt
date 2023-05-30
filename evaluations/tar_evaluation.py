@@ -86,8 +86,14 @@ def compute_different_cost_structures(res, cost_structs, target_recall=0.9):
             if "@" in method and f"@ {target_recall:.2f}" not in method:
                 continue
             for cs in cost_structs:
-                # if 'qbcb' in method.lower()
-                d.setdefault((method, cs.name), []).append(cs.evaluate(LinearStrategy(b=100), tr_idxs, y_c, r["it"], target_recall))
+                pre_cost = 0
+                if "qbcb" in method.lower():
+                    pre_sample = vals["QBCB@0.8 presample"]  # recall doesn't matter wrt recall
+                    assert pre_sample is not None, "QBCB presample cannot be none"
+                    pre_cost = cs.costs_of_annotated_docs(y_c[pre_sample])
+                d.setdefault((method, cs.name), []).append(
+                    cs.evaluate(LinearStrategy(b=100), tr_idxs, y_c, r["it"], target_recall) + pre_cost
+                )
     return pd.DataFrame(d).set_index(np.array(list(classes.keys()))), pd.Series(classes)
 
 
@@ -133,6 +139,8 @@ def latex_results(df, clss, exclude, target_rec=0.8, exclude_costs=True, precisi
         f"QuantCI 0 @ {target_rec:.2f}": "Quant",
         f"QuantCI 2.0 @ {target_rec:.2f}": "QuantCI",
         f"CHM @ {target_rec:.2f}": "CHM",
+        f"QBCB @ {target_rec:.2f}": "QBCB",
+        f"IPP @ {target_rec:.2f}": "IPP",
     }
     return (
         pd.DataFrame(new_d)
@@ -153,6 +161,8 @@ def boxplots(res, target_rec, legend_loc="lower right", d_name="RCV1-v2"):
         f"SLDQuant 0.0 & a=0.3 @ {target_rec:.2f} w\\ m=1": r"$\mathrm{SAL}_\tau^{R}$ (ours)",
         f"QuantCI 2.0 @ {target_rec:.2f}": "QuantCI",
         f"CHM @ {target_rec:.2f}": "CHM",
+        f"QBCB @ {target_rec:.2f}": "QBCB",
+        f"IPP @ {target_rec:.2f}": "IPP",
         "Knee": "Knee",
         "BudgetKnee": "Budget",
     }
