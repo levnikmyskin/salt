@@ -132,7 +132,11 @@ class PreviousRunUtils:
             self.class_runs[cls_] = run
         self.results[f"{cls_}_{run}"]["idxs"][0]
 
-    def get_qbcb_sample(self, recall: str, cls_run: str) -> (NDArray[int], NDArray[int]):
-        sample = self.results[f"{cls_run}"][f"QBCB@{recall} presample"]
-        pre = self.results[f"{cls_run}"][f"QBCB@{recall} prepositives"]
-        return sample, pre
+    def get_qbcb_sample(self, cls_run: str) -> (NDArray[int], NDArray[int]):
+        # Doesn't matter which one we take, samples do not depend on the
+        # target recall
+        for r in ["0.8", "0.9", "0.95"]:
+            sample = self.results[f"{cls_run}"][f"QBCB@{r} presample"]
+            pre = self.results[f"{cls_run}"][f"QBCB@{r} prepositives"]
+            if sample is not None and pre is not None:
+                return sample, pre
