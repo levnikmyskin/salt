@@ -71,7 +71,12 @@ def compute_tar_metrics(res, cost, target_recall=0.9, max_it=100):
             d.setdefault((method, "MSE"), []).append(mean_square_error(target_recall, r["recall"]))
             d.setdefault((method, "RE"), []).append(relative_error(target_recall, r["recall"]))
             it = r["it"] if r["it"] != np.inf else max_it
-            d.setdefault((method, "Cost"), []).append(cost.evaluate(LinearStrategy(b=100), tr_idxs, y_c, it, target_recall))
+            pre_cost = 0
+            if "qbcb" in method.lower():
+                pre_sample = vals["QBCB@0.8 presample"]  # recall doesn't matter wrt recall
+                assert pre_sample is not None, "QBCB presample cannot be none"
+                pre_cost = cs.costs_of_annotated_docs(y_c[pre_sample])
+            d.setdefault((method, "Cost"), []).append(cs.evaluate(LinearStrategy(b=100), tr_idxs, y_c, it, target_recall) + pre_cost)
     return pd.DataFrame(d).set_index(np.array(list(classes.keys()))), pd.Series(classes)
 
 
