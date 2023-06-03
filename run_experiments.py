@@ -37,8 +37,8 @@ def run_al(name, budget, x, y_c, pool_size, policy, stoppings):
     res["idxs"] = al.run(budget, pool_size)
     res["stops"] = al.get_stops_as_dict()
     for qbcb in filter(lambda s: type(s) is lewis_yang.QBCB, stoppings):
-        res[f"{qbcb}@{qbcb.target_recall} presample"] = qbcb.pre_sample
-        res[f"{qbcb}@{qbcb.target_recall} prepositives"] = qbcb.pre_positives
+        res[f"{qbcb} presample"] = qbcb.pre_sample
+        res[f"{qbcb} prepositives"] = qbcb.pre_positives
 
     return name, res
 
