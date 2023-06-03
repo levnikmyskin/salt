@@ -13,7 +13,7 @@ def run_al(name, budget, y_c, pool_size, policy, stoppings):
         LinearStrategy(b=100),
         np.arange(len(y_c)),
         y_c,
-        np.array([]),
+        policy.annotated_idxs[:2],
         stop_when_no_pos=False,
     )
     al = ActiveLearning(conf)
