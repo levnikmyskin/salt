@@ -157,7 +157,7 @@ def latex_results(df, clss, exclude, target_rec=0.8, exclude_costs=True, precisi
     )
 
 
-def boxplots(res, target_rec, legend_loc="lower right", d_name="RCV1-v2"):
+def boxplots(plot_name, res, target_rec, legend_loc="lower right", d_name="RCV1-v2"):
     d, _ = create_recall_df(res, target_rec)
     d = d.groupby(lambda i: i.split("_")[0]).mean()
 
@@ -178,7 +178,7 @@ def boxplots(res, target_rec, legend_loc="lower right", d_name="RCV1-v2"):
     plt.title(f"Estimated recall. Target recall = {target_rec}. Dataset {d_name}")
     plt.legend(loc=legend_loc)
     plt.tight_layout()
-    plt.show()
+    plt.savefig(plot_name)
 
 
 def proc(t):
@@ -192,10 +192,11 @@ def proc(t):
 if __name__ == "__main__":
     from run_experiments import *
     from multiprocessing import Pool
+    import sys
     import re
 
     manager = TmtManager()
-    manager.set_entry_by_name("rcv1_sneid_qbcb_rs")
+    manager.set_entry_by_name(sys.argv[1])
     res = {k: v for k, v in next(manager.load_results())[1].items() if "y_c" in v}
     cost_structs = [
         YangIdealizedCost(),
