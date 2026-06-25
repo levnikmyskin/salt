@@ -1,5 +1,5 @@
 # SALτ : Efficiently Stopping TAR by Improving Priors Estimates
-We publish in this Github repository the Python code for our paper *SALτ : Efficiently Stopping TAR by Improving Priors Estimates*.
+We publish in this Github repository the Python code for our paper [SALτ : Efficiently Stopping TAR by Improving Priors Estimates](https://link.springer.com/article/10.1007/s10618-023-00961-5).
 Our method details can be found in `sld/sld_stopping.py` file.
 
 ## Datasets
